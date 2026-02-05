@@ -1,12 +1,12 @@
-# json_schema
+# glon
 
 A Gleam library for JSON Schema generation and decoding. Define a schema once, then use it to both generate a JSON Schema string and decode JSON values into typed Gleam data.
 
-[![Package Version](https://img.shields.io/hexpm/v/json_schema)](https://hex.pm/packages/json_schema)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/json_schema/)
+[![Package Version](https://img.shields.io/hexpm/v/glon)](https://hex.pm/packages/glon)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/glon/)
 
 ```sh
-gleam add json_schema@1
+gleam add glon@1
 ```
 
 ## How it works
@@ -21,27 +21,27 @@ The schema and decoder are always in sync -- if you say a field is a string, the
 ## Quick start
 
 ```gleam
-import json_schema as js
+import glon
 
 pub type User {
   User(name: String, age: Int)
 }
 
 fn user_schema() {
-  use name <- js.field("name", js.string())
-  use age <- js.field("age", js.integer())
-  js.success(User(name:, age:))
+  use name <- glon.field("name", glon.string())
+  use age <- glon.field("age", glon.integer())
+  glon.success(User(name:, age:))
 }
 
 pub fn main() {
   let schema = user_schema()
 
   // Generate JSON Schema
-  js.to_string(schema)
+  glon.to_string(schema)
   // -> {"type":"object","properties":{"name":{"type":"string"},"age":{"type":"integer"}},"required":["name","age"]}
 
   // Decode JSON values
-  js.decode(schema, from: "{\"name\":\"Alice\",\"age\":30}")
+  glon.decode(schema, from: "{\"name\":\"Alice\",\"age\":30}")
   // -> Ok(User(name: "Alice", age: 30))
 }
 ```
@@ -52,7 +52,7 @@ A more realistic schema with nested objects, arrays, optional fields, nullable f
 
 ```gleam
 import gleam/option.{type Option}
-import json_schema as js
+import glon
 
 pub type Address {
   Address(street: String, city: String, zip: Option(String))
@@ -76,32 +76,32 @@ pub type Company {
 }
 
 fn address_schema() {
-  use street <- js.field("street", js.string() |> js.describe("Street address"))
-  use city <- js.field("city", js.string())
-  use zip <- js.optional("zip", js.string() |> js.describe("ZIP or postal code"))
-  js.success(Address(street:, city:, zip:))
+  use street <- glon.field("street", glon.string() |> glon.describe("Street address"))
+  use city <- glon.field("city", glon.string())
+  use zip <- glon.optional("zip", glon.string() |> glon.describe("ZIP or postal code"))
+  glon.success(Address(street:, city:, zip:))
 }
 
 fn tag_schema() {
-  use key <- js.field("key", js.string())
-  use value <- js.field("value", js.string())
-  js.success(Tag(key:, value:))
+  use key <- glon.field("key", glon.string())
+  use value <- glon.field("value", glon.string())
+  glon.success(Tag(key:, value:))
 }
 
 fn company_schema() {
-  use name <- js.field("name", js.string() |> js.describe("Legal company name"))
-  use founded_year <- js.field("founded_year", js.integer() |> js.describe("Year the company was founded"))
-  use public <- js.field("public", js.boolean() |> js.describe("Whether publicly traded"))
-  use rating <- js.optional_or_null("rating", js.number() |> js.describe("Rating from 0.0 to 5.0"))
-  use address <- js.field("address", address_schema())
-  use tags <- js.field("tags", js.array(of: tag_schema()) |> js.describe("Categorization tags"))
-  use website <- js.optional("website", js.string())
-  use phone <- js.optional_or_null("phone", js.string())
-  js.success(Company(name:, founded_year:, public:, rating:, address:, tags:, website:, phone:))
+  use name <- glon.field("name", glon.string() |> glon.describe("Legal company name"))
+  use founded_year <- glon.field("founded_year", glon.integer() |> glon.describe("Year the company was founded"))
+  use public <- glon.field("public", glon.boolean() |> glon.describe("Whether publicly traded"))
+  use rating <- glon.optional_or_null("rating", glon.number() |> glon.describe("Rating from 0.0 to 5.0"))
+  use address <- glon.field("address", address_schema())
+  use tags <- glon.field("tags", glon.array(of: tag_schema()) |> glon.describe("Categorization tags"))
+  use website <- glon.optional("website", glon.string())
+  use phone <- glon.optional_or_null("phone", glon.string())
+  glon.success(Company(name:, founded_year:, public:, rating:, address:, tags:, website:, phone:))
 }
 ```
 
-`js.to_string(company_schema())` produces:
+`glon.to_string(company_schema())` produces:
 
 ```json
 {
@@ -143,15 +143,15 @@ The same schema decodes JSON into typed Gleam values:
 
 ```gleam
 // All fields present
-js.decode(company_schema(), from: "{\"name\":\"Acme Corp\",\"founded_year\":1995,\"public\":true,\"rating\":4.5,\"address\":{\"street\":\"123 Main St\",\"city\":\"Springfield\",\"zip\":\"62704\"},\"tags\":[{\"key\":\"industry\",\"value\":\"tech\"}],\"website\":\"https://acme.example.com\",\"phone\":\"+1-555-0100\"}")
+glon.decode(company_schema(), from: "{\"name\":\"Acme Corp\",\"founded_year\":1995,\"public\":true,\"rating\":4.5,\"address\":{\"street\":\"123 Main St\",\"city\":\"Springfield\",\"zip\":\"62704\"},\"tags\":[{\"key\":\"industry\",\"value\":\"tech\"}],\"website\":\"https://acme.example.com\",\"phone\":\"+1-555-0100\"}")
 // -> Ok(Company(name: "Acme Corp", founded_year: 1995, public: True, rating: Some(4.5), ...))
 
 // Only required fields
-js.decode(company_schema(), from: "{\"name\":\"Tiny LLC\",\"founded_year\":2020,\"public\":false,\"address\":{\"street\":\"1 Elm St\",\"city\":\"Shelbyville\"},\"tags\":[]}")
+glon.decode(company_schema(), from: "{\"name\":\"Tiny LLC\",\"founded_year\":2020,\"public\":false,\"address\":{\"street\":\"1 Elm St\",\"city\":\"Shelbyville\"},\"tags\":[]}")
 // -> Ok(Company(name: "Tiny LLC", ..., rating: None, website: None, phone: None))
 
 // Explicit nulls
-js.decode(company_schema(), from: "{\"name\":\"Null Inc\",\"founded_year\":2010,\"public\":true,\"rating\":null,\"address\":{\"street\":\"0 Zero Rd\",\"city\":\"Nowhere\"},\"tags\":[],\"phone\":null}")
+glon.decode(company_schema(), from: "{\"name\":\"Null Inc\",\"founded_year\":2010,\"public\":true,\"rating\":null,\"address\":{\"street\":\"0 Zero Rd\",\"city\":\"Nowhere\"},\"tags\":[],\"phone\":null}")
 // -> Ok(Company(name: "Null Inc", ..., rating: None, phone: None))
 ```
 
@@ -161,44 +161,44 @@ js.decode(company_schema(), from: "{\"name\":\"Null Inc\",\"founded_year\":2010,
 
 | Function | Type | JSON Schema |
 |---|---|---|
-| `js.string()` | `JsonSchema(String)` | `{"type": "string"}` |
-| `js.integer()` | `JsonSchema(Int)` | `{"type": "integer"}` |
-| `js.number()` | `JsonSchema(Float)` | `{"type": "number"}` |
-| `js.boolean()` | `JsonSchema(Bool)` | `{"type": "boolean"}` |
+| `glon.string()` | `JsonSchema(String)` | `{"type": "string"}` |
+| `glon.integer()` | `JsonSchema(Int)` | `{"type": "integer"}` |
+| `glon.number()` | `JsonSchema(Float)` | `{"type": "number"}` |
+| `glon.boolean()` | `JsonSchema(Bool)` | `{"type": "boolean"}` |
 
 ### Composites
 
 | Function | Type | JSON Schema |
 |---|---|---|
-| `js.array(of: schema)` | `JsonSchema(List(t))` | `{"type": "array", "items": ...}` |
-| `js.nullable(schema)` | `JsonSchema(Option(t))` | `{"type": ["<t>", "null"]}` |
+| `glon.array(of: schema)` | `JsonSchema(List(t))` | `{"type": "array", "items": ...}` |
+| `glon.nullable(schema)` | `JsonSchema(Option(t))` | `{"type": ["<t>", "null"]}` |
 
 ### Object fields
 
 | Function | Required? | Nullable? | Gleam type |
 |---|---|---|---|
-| `js.field` | yes | no | `t` |
-| `js.optional` | no | no | `Option(t)` |
-| `js.optional_or_null` | no | yes | `Option(t)` |
-| `js.field_with_default` | no | no | `t` (uses default when absent) |
+| `glon.field` | yes | no | `t` |
+| `glon.optional` | no | no | `Option(t)` |
+| `glon.optional_or_null` | no | yes | `Option(t)` |
+| `glon.field_with_default` | no | no | `t` (uses default when absent) |
 
 All four are used with Gleam's `use` syntax to chain fields:
 
 ```gleam
-use value <- js.field("name", js.string())
-use value <- js.optional("name", js.string())
-use value <- js.optional_or_null("name", js.string())
-use value <- js.field_with_default("port", js.integer(), default: 8080, encode: json.int)
+use value <- glon.field("name", glon.string())
+use value <- glon.optional("name", glon.string())
+use value <- glon.optional_or_null("name", glon.string())
+use value <- glon.field_with_default("port", glon.integer(), default: 8080, encode: json.int)
 ```
 
 ### Enum / Const
 
 | Function | Type | JSON Schema |
 |---|---|---|
-| `js.enum(["a", "b"])` | `JsonSchema(String)` | `{"type": "string", "enum": ["a", "b"]}` |
-| `js.enum_map([#("a", A), #("b", B)])` | `JsonSchema(t)` | `{"type": "string", "enum": ["a", "b"]}` |
-| `js.constant("a")` | `JsonSchema(String)` | `{"type": "string", "const": "a"}` |
-| `js.constant_map("a", A)` | `JsonSchema(t)` | `{"type": "string", "const": "a"}` |
+| `glon.enum(["a", "b"])` | `JsonSchema(String)` | `{"type": "string", "enum": ["a", "b"]}` |
+| `glon.enum_map([#("a", A), #("b", B)])` | `JsonSchema(t)` | `{"type": "string", "enum": ["a", "b"]}` |
+| `glon.constant("a")` | `JsonSchema(String)` | `{"type": "string", "const": "a"}` |
+| `glon.constant_map("a", A)` | `JsonSchema(t)` | `{"type": "string", "const": "a"}` |
 
 The `_map` variants decode to a custom Gleam type instead of `String`:
 
@@ -206,29 +206,29 @@ The `_map` variants decode to a custom Gleam type instead of `String`:
 type Color { Red Green Blue }
 
 // Decodes to String
-js.enum(["red", "green", "blue"])
+glon.enum(["red", "green", "blue"])
 
 // Decodes to Color
-js.enum_map([#("red", Red), #("green", Green), #("blue", Blue)])
+glon.enum_map([#("red", Red), #("green", Green), #("blue", Blue)])
 ```
 
 ### Combinators
 
 | Function | JSON Schema | Description |
 |---|---|---|
-| `js.map(schema, transform)` | *(unchanged)* | Transform decoded type without changing schema |
-| `js.one_of([a, b, ...])` | `{"oneOf": [...]}` | Value must match exactly one sub-schema |
-| `js.any_of([a, b, ...])` | `{"anyOf": [...]}` | Value must match at least one sub-schema |
-| `js.tagged_union("type", [...])` | `{"oneOf": [...]}` with discriminator | Discriminated union with tag field |
+| `glon.map(schema, transform)` | *(unchanged)* | Transform decoded type without changing schema |
+| `glon.one_of([a, b, ...])` | `{"oneOf": [...]}` | Value must match exactly one sub-schema |
+| `glon.any_of([a, b, ...])` | `{"anyOf": [...]}` | Value must match at least one sub-schema |
+| `glon.tagged_union("type", [...])` | `{"oneOf": [...]}` with discriminator | Discriminated union with tag field |
 
 Use `map` to align types for `one_of` / `any_of`:
 
 ```gleam
 type Value { TextVal(String) NumVal(Int) }
 
-let schema = js.one_of([
-  js.string() |> js.map(TextVal),
-  js.integer() |> js.map(NumVal),
+let schema = glon.one_of([
+  glon.string() |> glon.map(TextVal),
+  glon.integer() |> glon.map(NumVal),
 ])
 ```
 
@@ -237,14 +237,14 @@ Use `tagged_union` for discriminated unions:
 ```gleam
 type Shape { Circle(Float) Square(Float) }
 
-let schema = js.tagged_union("type", [
+let schema = glon.tagged_union("type", [
   #("circle", {
-    use radius <- js.field("radius", js.number())
-    js.success(Circle(radius))
+    use radius <- glon.field("radius", glon.number())
+    glon.success(Circle(radius))
   }),
   #("square", {
-    use side <- js.field("side", js.number())
-    js.success(Square(side))
+    use side <- glon.field("side", glon.number())
+    glon.success(Square(side))
   }),
 ])
 ```
@@ -255,15 +255,15 @@ All string constraints are enforced during decode.
 
 | Function | JSON Schema | Decode behavior |
 |---|---|---|
-| `js.min_length(schema, n)` | `{"minLength": n}` | Rejects strings shorter than `n` |
-| `js.max_length(schema, n)` | `{"maxLength": n}` | Rejects strings longer than `n` |
-| `js.pattern(schema, regex)` | `{"pattern": "..."}` | Rejects strings not matching the regex |
+| `glon.min_length(schema, n)` | `{"minLength": n}` | Rejects strings shorter than `n` |
+| `glon.max_length(schema, n)` | `{"maxLength": n}` | Rejects strings longer than `n` |
+| `glon.pattern(schema, regex)` | `{"pattern": "..."}` | Rejects strings not matching the regex |
 
 ```gleam
-js.string()
-|> js.min_length(1)
-|> js.max_length(100)
-|> js.pattern("^[a-zA-Z]+$")
+glon.string()
+|> glon.min_length(1)
+|> glon.max_length(100)
+|> glon.pattern("^[a-zA-Z]+$")
 ```
 
 ### Number validation
@@ -272,34 +272,34 @@ All number constraints are enforced during decode. Constraint values are `Float`
 
 | Function | JSON Schema | Decode behavior |
 |---|---|---|
-| `js.minimum(schema, n)` | `{"minimum": n}` | Rejects values < `n` |
-| `js.maximum(schema, n)` | `{"maximum": n}` | Rejects values > `n` |
-| `js.exclusive_minimum(schema, n)` | `{"exclusiveMinimum": n}` | Rejects values <= `n` |
-| `js.exclusive_maximum(schema, n)` | `{"exclusiveMaximum": n}` | Rejects values >= `n` |
-| `js.multiple_of(schema, n)` | `{"multipleOf": n}` | Rejects values not a multiple of `n` |
+| `glon.minimum(schema, n)` | `{"minimum": n}` | Rejects values < `n` |
+| `glon.maximum(schema, n)` | `{"maximum": n}` | Rejects values > `n` |
+| `glon.exclusive_minimum(schema, n)` | `{"exclusiveMinimum": n}` | Rejects values <= `n` |
+| `glon.exclusive_maximum(schema, n)` | `{"exclusiveMaximum": n}` | Rejects values >= `n` |
+| `glon.multiple_of(schema, n)` | `{"multipleOf": n}` | Rejects values not a multiple of `n` |
 
 ```gleam
-js.integer()
-|> js.minimum(0.0)
-|> js.maximum(100.0)
+glon.integer()
+|> glon.minimum(0.0)
+|> glon.maximum(100.0)
 
-js.number()
-|> js.exclusive_minimum(0.0)
-|> js.multiple_of(0.5)
+glon.number()
+|> glon.exclusive_minimum(0.0)
+|> glon.multiple_of(0.5)
 ```
 
 ### Annotations
 
 ```gleam
-js.string() |> js.describe("A human-readable description")
+glon.string() |> glon.describe("A human-readable description")
 ```
 
 ### Operations
 
 ```gleam
-js.to_string(schema)                    // -> String (JSON Schema)
-js.to_json(schema)                      // -> json.Json (for embedding in larger structures)
-js.decode(schema, from: json_string)    // -> Result(t, json.DecodeError)
+glon.to_string(schema)                    // -> String (JSON Schema)
+glon.to_json(schema)                      // -> json.Json (for embedding in larger structures)
+glon.decode(schema, from: json_string)    // -> Result(t, json.DecodeError)
 ```
 
 ## JSON Schema coverage

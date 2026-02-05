@@ -47,8 +47,8 @@ pub opaque type JsonSchema(t) {
 
 // --- FFI ---
 
-@external(erlang, "json_schema_ffi", "coerce_nil")
-@external(javascript, "./json_schema_ffi.mjs", "coerce_nil")
+@external(erlang, "glon_ffi", "coerce_nil")
+@external(javascript, "./glon_ffi.mjs", "coerce_nil")
 fn coerce_nil() -> a
 
 // --- Primitives ---
@@ -60,11 +60,11 @@ fn coerce_nil() -> a
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.string()
-/// json_schema.to_string(schema)
+/// let schema = glon.string()
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"string\"}"
 ///
-/// json_schema.decode(schema, from: "\"hello\"")
+/// glon.decode(schema, from: "\"hello\"")
 /// // -> Ok("hello")
 /// ```
 pub fn string() -> JsonSchema(String) {
@@ -78,11 +78,11 @@ pub fn string() -> JsonSchema(String) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.integer()
-/// json_schema.to_string(schema)
+/// let schema = glon.integer()
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"integer\"}"
 ///
-/// json_schema.decode(schema, from: "42")
+/// glon.decode(schema, from: "42")
 /// // -> Ok(42)
 /// ```
 pub fn integer() -> JsonSchema(Int) {
@@ -96,11 +96,11 @@ pub fn integer() -> JsonSchema(Int) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.number()
-/// json_schema.to_string(schema)
+/// let schema = glon.number()
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"number\"}"
 ///
-/// json_schema.decode(schema, from: "3.14")
+/// glon.decode(schema, from: "3.14")
 /// // -> Ok(3.14)
 /// ```
 pub fn number() -> JsonSchema(Float) {
@@ -114,11 +114,11 @@ pub fn number() -> JsonSchema(Float) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.boolean()
-/// json_schema.to_string(schema)
+/// let schema = glon.boolean()
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"boolean\"}"
 ///
-/// json_schema.decode(schema, from: "true")
+/// glon.decode(schema, from: "true")
 /// // -> Ok(True)
 /// ```
 pub fn boolean() -> JsonSchema(Bool) {
@@ -135,11 +135,11 @@ pub fn boolean() -> JsonSchema(Bool) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.array(of: json_schema.string())
-/// json_schema.to_string(schema)
+/// let schema = glon.array(of: glon.string())
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"array\",\"items\":{\"type\":\"string\"}}"
 ///
-/// json_schema.decode(schema, from: "[\"a\",\"b\"]")
+/// glon.decode(schema, from: "[\"a\",\"b\"]")
 /// // -> Ok(["a", "b"])
 /// ```
 pub fn array(of inner: JsonSchema(t)) -> JsonSchema(List(t)) {
@@ -158,14 +158,14 @@ pub fn array(of inner: JsonSchema(t)) -> JsonSchema(List(t)) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.nullable(json_schema.string())
-/// json_schema.to_string(schema)
+/// let schema = glon.nullable(glon.string())
+/// glon.to_string(schema)
 /// // -> "{\"type\":[\"string\",\"null\"]}"
 ///
-/// json_schema.decode(schema, from: "\"hello\"")
+/// glon.decode(schema, from: "\"hello\"")
 /// // -> Ok(Some("hello"))
 ///
-/// json_schema.decode(schema, from: "null")
+/// glon.decode(schema, from: "null")
 /// // -> Ok(None)
 /// ```
 pub fn nullable(inner: JsonSchema(t)) -> JsonSchema(Option(t)) {
@@ -185,14 +185,14 @@ pub fn nullable(inner: JsonSchema(t)) -> JsonSchema(Option(t)) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.enum(["red", "green", "blue"])
-/// json_schema.to_string(schema)
+/// let schema = glon.enum(["red", "green", "blue"])
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"string\",\"enum\":[\"red\",\"green\",\"blue\"]}"
 ///
-/// json_schema.decode(schema, from: "\"red\"")
+/// glon.decode(schema, from: "\"red\"")
 /// // -> Ok("red")
 ///
-/// json_schema.decode(schema, from: "\"yellow\"")
+/// glon.decode(schema, from: "\"yellow\"")
 /// // -> Error(...)
 /// ```
 pub fn enum(values: List(String)) -> JsonSchema(String) {
@@ -208,13 +208,13 @@ pub fn enum(values: List(String)) -> JsonSchema(String) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.enum_map([
+/// let schema = glon.enum_map([
 ///   #("red", Red), #("green", Green), #("blue", Blue),
 /// ])
-/// json_schema.to_string(schema)
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"string\",\"enum\":[\"red\",\"green\",\"blue\"]}"
 ///
-/// json_schema.decode(schema, from: "\"red\"")
+/// glon.decode(schema, from: "\"red\"")
 /// // -> Ok(Red)
 /// ```
 pub fn enum_map(variants: List(#(String, t))) -> JsonSchema(t) {
@@ -237,14 +237,14 @@ pub fn enum_map(variants: List(#(String, t))) -> JsonSchema(t) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.constant("active")
-/// json_schema.to_string(schema)
+/// let schema = glon.constant("active")
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"string\",\"const\":\"active\"}"
 ///
-/// json_schema.decode(schema, from: "\"active\"")
+/// glon.decode(schema, from: "\"active\"")
 /// // -> Ok("active")
 ///
-/// json_schema.decode(schema, from: "\"inactive\"")
+/// glon.decode(schema, from: "\"inactive\"")
 /// // -> Error(...)
 /// ```
 pub fn constant(value: String) -> JsonSchema(String) {
@@ -257,11 +257,11 @@ pub fn constant(value: String) -> JsonSchema(String) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.constant_map("yes", mapped: True)
-/// json_schema.to_string(schema)
+/// let schema = glon.constant_map("yes", mapped: True)
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"string\",\"const\":\"yes\"}"
 ///
-/// json_schema.decode(schema, from: "\"yes\"")
+/// glon.decode(schema, from: "\"yes\"")
 /// // -> Ok(True)
 /// ```
 pub fn constant_map(value: String, mapped mapped: t) -> JsonSchema(t) {
@@ -298,9 +298,9 @@ fn enum_decoder(
 ///
 /// ```gleam
 /// let schema =
-///   json_schema.string()
-///   |> json_schema.describe("A person's full name")
-/// json_schema.to_string(schema)
+///   glon.string()
+///   |> glon.describe("A person's full name")
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"string\",\"description\":\"A person's full name\"}"
 /// ```
 pub fn describe(
@@ -326,11 +326,11 @@ pub fn describe(
 /// ```gleam
 /// type Email { Email(String) }
 ///
-/// let schema = json_schema.string() |> json_schema.map(Email)
-/// json_schema.to_string(schema)
+/// let schema = glon.string() |> glon.map(Email)
+/// glon.to_string(schema)
 /// // -> "{\"type\":\"string\"}"
 ///
-/// json_schema.decode(schema, from: "\"a@b.com\"")
+/// glon.decode(schema, from: "\"a@b.com\"")
 /// // -> Ok(Email("a@b.com"))
 /// ```
 pub fn map(schema: JsonSchema(a), with transform: fn(a) -> b) -> JsonSchema(b) {
@@ -351,11 +351,11 @@ pub fn map(schema: JsonSchema(a), with transform: fn(a) -> b) -> JsonSchema(b) {
 /// ```gleam
 /// type Value { TextVal(String) NumVal(Int) }
 ///
-/// let schema = json_schema.one_of([
-///   json_schema.string() |> json_schema.map(TextVal),
-///   json_schema.integer() |> json_schema.map(NumVal),
+/// let schema = glon.one_of([
+///   glon.string() |> glon.map(TextVal),
+///   glon.integer() |> glon.map(NumVal),
 /// ])
-/// json_schema.to_string(schema)
+/// glon.to_string(schema)
 /// // -> "{\"oneOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}"
 /// ```
 pub fn one_of(variants: List(JsonSchema(t))) -> JsonSchema(t) {
@@ -379,11 +379,11 @@ pub fn one_of(variants: List(JsonSchema(t))) -> JsonSchema(t) {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.any_of([
-///   json_schema.string() |> json_schema.map(TextVal),
-///   json_schema.integer() |> json_schema.map(NumVal),
+/// let schema = glon.any_of([
+///   glon.string() |> glon.map(TextVal),
+///   glon.integer() |> glon.map(NumVal),
 /// ])
-/// json_schema.to_string(schema)
+/// glon.to_string(schema)
 /// // -> "{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}"
 /// ```
 pub fn any_of(variants: List(JsonSchema(t))) -> JsonSchema(t) {
@@ -408,14 +408,14 @@ pub fn any_of(variants: List(JsonSchema(t))) -> JsonSchema(t) {
 /// ```gleam
 /// type Shape { Circle(Float) Square(Float) }
 ///
-/// let schema = json_schema.tagged_union("type", [
+/// let schema = glon.tagged_union("type", [
 ///   #("circle", {
-///     use radius <- json_schema.field("radius", json_schema.number())
-///     json_schema.success(Circle(radius))
+///     use radius <- glon.field("radius", glon.number())
+///     glon.success(Circle(radius))
 ///   }),
 ///   #("square", {
-///     use side <- json_schema.field("side", json_schema.number())
-///     json_schema.success(Square(side))
+///     use side <- glon.field("side", glon.number())
+///     glon.success(Square(side))
 ///   }),
 /// ])
 /// ```
@@ -463,9 +463,9 @@ pub fn tagged_union(
 ///
 /// ```gleam
 /// let schema = {
-///   use name <- json_schema.field("name", json_schema.string())
-///   use age <- json_schema.field("age", json_schema.integer())
-///   json_schema.success(User(name:, age:))
+///   use name <- glon.field("name", glon.string())
+///   use age <- glon.field("age", glon.integer())
+///   glon.success(User(name:, age:))
 /// }
 /// ```
 pub fn success(value: t) -> JsonSchema(t) {
@@ -483,11 +483,11 @@ pub fn success(value: t) -> JsonSchema(t) {
 ///
 /// ```gleam
 /// let schema = {
-///   use name <- json_schema.field("name", json_schema.string())
-///   use age <- json_schema.field("age", json_schema.integer())
-///   json_schema.success(User(name:, age:))
+///   use name <- glon.field("name", glon.string())
+///   use age <- glon.field("age", glon.integer())
+///   glon.success(User(name:, age:))
 /// }
-/// json_schema.decode(schema, from: "{\"name\":\"Alice\",\"age\":30}")
+/// glon.decode(schema, from: "{\"name\":\"Alice\",\"age\":30}")
 /// // -> Ok(User(name: "Alice", age: 30))
 /// ```
 pub fn field(
@@ -524,11 +524,11 @@ pub fn field(
 ///
 /// ```gleam
 /// let schema = {
-///   use name <- json_schema.field("name", json_schema.string())
-///   use email <- json_schema.optional("email", json_schema.string())
-///   json_schema.success(User(name:, email:))
+///   use name <- glon.field("name", glon.string())
+///   use email <- glon.optional("email", glon.string())
+///   glon.success(User(name:, email:))
 /// }
-/// json_schema.decode(schema, from: "{\"name\":\"Alice\"}")
+/// glon.decode(schema, from: "{\"name\":\"Alice\"}")
 /// // -> Ok(User(name: "Alice", email: None))
 /// ```
 pub fn optional(
@@ -568,9 +568,9 @@ pub fn optional(
 ///
 /// ```gleam
 /// let schema = {
-///   use name <- json_schema.field("name", json_schema.string())
-///   use nick <- json_schema.optional_or_null("nickname", json_schema.string())
-///   json_schema.success(User(name:, nickname: nick))
+///   use name <- glon.field("name", glon.string())
+///   use nick <- glon.optional_or_null("nickname", glon.string())
+///   glon.success(User(name:, nickname: nick))
 /// }
 /// // Field absent -> None, field null -> None, field present -> Some(value)
 /// ```
@@ -621,20 +621,20 @@ pub fn optional_or_null(
 ///
 /// ```gleam
 /// let schema = {
-///   use host <- json_schema.field("host", json_schema.string())
-///   use port <- json_schema.field_with_default(
-///     "port", json_schema.integer(),
+///   use host <- glon.field("host", glon.string())
+///   use port <- glon.field_with_default(
+///     "port", glon.integer(),
 ///     default: 8080, encode: json.int,
 ///   )
-///   json_schema.success(Config(host:, port:))
+///   glon.success(Config(host:, port:))
 /// }
-/// json_schema.to_string(schema)
+/// glon.to_string(schema)
 /// // -> "{...\"port\":{\"type\":\"integer\",\"default\":8080}...}"
 ///
-/// json_schema.decode(schema, from: "{\"host\":\"localhost\"}")
+/// glon.decode(schema, from: "{\"host\":\"localhost\"}")
 /// // -> Ok(Config(host: "localhost", port: 8080))
 ///
-/// json_schema.decode(schema, from: "{\"host\":\"localhost\",\"port\":3000}")
+/// glon.decode(schema, from: "{\"host\":\"localhost\",\"port\":3000}")
 /// // -> Ok(Config(host: "localhost", port: 3000))
 /// ```
 pub fn field_with_default(
@@ -684,7 +684,7 @@ pub fn to_json(schema: JsonSchema(t)) -> json.Json {
 /// ## Examples
 ///
 /// ```gleam
-/// json_schema.string() |> json_schema.to_string
+/// glon.string() |> glon.to_string
 /// // -> "{\"type\":\"string\"}"
 /// ```
 pub fn to_string(schema: JsonSchema(t)) -> String {
@@ -701,11 +701,11 @@ pub fn to_string(schema: JsonSchema(t)) -> String {
 /// ## Examples
 ///
 /// ```gleam
-/// let schema = json_schema.integer()
-/// json_schema.decode(schema, from: "42")
+/// let schema = glon.integer()
+/// glon.decode(schema, from: "42")
 /// // -> Ok(42)
 ///
-/// json_schema.decode(schema, from: "\"not a number\"")
+/// glon.decode(schema, from: "\"not a number\"")
 /// // -> Error(...)
 /// ```
 pub fn decode(

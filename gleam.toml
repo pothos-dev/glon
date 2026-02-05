@@ -1,4 +1,4 @@
-name = "json_schema"
+name = "glon"
 version = "1.0.0"
 
 description = "JSON Schema generation and decoding for Gleam"
